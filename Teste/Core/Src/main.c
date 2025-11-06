@@ -99,6 +99,7 @@ int main(void)
   }
   else{
 	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, 1);
+	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, 1);
   }
 
 //HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
