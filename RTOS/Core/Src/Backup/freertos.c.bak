@@ -1,0 +1,282 @@
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * File Name          : freertos.c
+  * Description        : Code for freertos applications
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2025 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+
+/* Includes ------------------------------------------------------------------*/
+#include "FreeRTOS.h"
+#include "task.h"
+#include "main.h"
+#include "cmsis_os.h"
+
+/* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h> // Necessario para strlen
+#include "usbd_cdc_if.h"
+
+// IMPORTANTE: Adicionado para reconhecer UART_HandleTypeDef
+#include "stm32f4xx_hal.h"
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+enum
+ {
+ 	PERIPHERAL_USART,	// UART serial device (Cabo USB Virtual Com Port)
+ 	PERIPHERAL_USB 		// USB device (USB CDC Nativo)
+ };
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+/* USER CODE BEGIN Variables */
+
+// A Nucleo F411 usa a USART2 para comunicar com o PC via cabo USB
+extern UART_HandleTypeDef huart2;
+
+/* USER CODE END Variables */
+osThreadId defaultTaskHandle;
+osThreadId myTask_led_3Handle;
+osThreadId myTask_led_7Handle;
+osThreadId myTask_led_11Handle;
+osMessageQId myQueue01Handle;
+
+/* Private function prototypes -----------------------------------------------*/
+/* USER CODE BEGIN FunctionPrototypes */
+void myPrintf(uint16_t peripheral, char *format, ...);
+/* USER CODE END FunctionPrototypes */
+
+void StartDefaultTask(void const * argument);
+void StartTask_led_3(void const * argument);
+void StartTask_led_7(void const * argument);
+void StartTask_led_11(void const * argument);
+
+extern void MX_USB_DEVICE_Init(void);
+void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
+
+/* GetIdleTaskMemory prototype (linked to static allocation support) */
+void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize );
+
+/* USER CODE BEGIN GET_IDLE_TASK_MEMORY */
+static StaticTask_t xIdleTaskTCBBuffer;
+static StackType_t xIdleStack[configMINIMAL_STACK_SIZE];
+
+void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize )
+{
+  *ppxIdleTaskTCBBuffer = &xIdleTaskTCBBuffer;
+  *ppxIdleTaskStackBuffer = &xIdleStack[0];
+  *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+  /* place for user code */
+}
+/* USER CODE END GET_IDLE_TASK_MEMORY */
+
+/**
+  * @brief  FreeRTOS initialization
+  * @param  None
+  * @retval None
+  */
+void MX_FREERTOS_Init(void) {
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* Create the queue(s) */
+  /* definition and creation of myQueue01 */
+  osMessageQDef(myQueue01, 16, uint16_t);
+  myQueue01Handle = osMessageCreate(osMessageQ(myQueue01), NULL);
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* definition and creation of defaultTask */
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+
+  /* definition and creation of myTask_led_3 */
+  osThreadDef(myTask_led_3, StartTask_led_3, osPriorityNormal, 0, 128);
+  myTask_led_3Handle = osThreadCreate(osThread(myTask_led_3), NULL);
+
+  /* definition and creation of myTask_led_7 */
+  osThreadDef(myTask_led_7, StartTask_led_7, osPriorityNormal, 0, 128);
+  myTask_led_7Handle = osThreadCreate(osThread(myTask_led_7), NULL);
+
+  /* definition and creation of myTask_led_11 */
+  osThreadDef(myTask_led_11, StartTask_led_11, osPriorityNormal, 0, 128);
+  myTask_led_11Handle = osThreadCreate(osThread(myTask_led_11), NULL);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+}
+
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void const * argument)
+{
+  /* init code for USB_DEVICE */
+  MX_USB_DEVICE_Init();
+  /* USER CODE BEGIN StartDefaultTask */
+  /* Infinite loop */
+  for(;;)
+  {
+	  osDelay(1000); // Delay adicionado para não travar
+  }
+  /* USER CODE END StartDefaultTask */
+}
+
+/* USER CODE BEGIN Header_StartTask_led_3 */
+/**
+* @brief Function implementing the myTask_led_3 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTask_led_3 */
+void StartTask_led_3(void const * argument)
+{
+  /* USER CODE BEGIN StartTask_led_3 */
+
+  // Envia mensagem inicial
+  myPrintf(PERIPHERAL_USART, "Inicio Task 3\r\n");
+
+  /* Infinite loop */
+  for(;;)
+  {
+      // Envia evento para a queue
+      osMessagePut(myQueue01Handle, 0x12, 200);
+
+      // Delay DEVE estar dentro do loop
+      osDelay(200);
+  }
+  /* USER CODE END StartTask_led_3 */
+}
+
+/* USER CODE BEGIN Header_StartTask_led_7 */
+/**
+* @brief Function implementing the myTask_led_7 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTask_led_7 */
+void StartTask_led_7(void const * argument)
+{
+  /* USER CODE BEGIN StartTask_led_7 */
+  /* Infinite loop */
+  for(;;)
+  {
+      // Envia "ola" pela porta serial (UART/COM)
+      myPrintf(PERIPHERAL_USART, "Ola via UART\r\n");
+
+      // Pisca LED no pino PA7 (Verifique se tem LED conectado aqui)
+      // Nota: O LED verde da Nucleo F411 costuma ser PA5
+      HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_7);
+
+      osDelay(500);
+  }
+  /* USER CODE END StartTask_led_7 */
+}
+
+/* USER CODE BEGIN Header_StartTask_led_11 */
+/**
+* @brief Function implementing the myTask_led_11 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTask_led_11 */
+void StartTask_led_11(void const * argument)
+{
+  /* USER CODE BEGIN StartTask_led_11 */
+  osEvent evt;
+
+  /* Infinite loop */
+  for(;;)
+  {
+      evt = osMessageGet(myQueue01Handle, 4000); // Espera mensagem por 4s
+
+      if (evt.status == osEventMessage)
+      {
+          uint16_t val = evt.value.p;
+          if (val == 0x12)
+          {
+              // Toggles LED no pino PA5 (LED Verde da Nucleo)
+              HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+          }
+      }
+      osDelay(1); // Delay minimo
+  }
+  /* USER CODE END StartTask_led_11 */
+}
+
+/* Private application code --------------------------------------------------*/
+/* USER CODE BEGIN Application */
+
+void myPrintf(uint16_t peripheral, char *format, ...)
+{
+ 	char buffer[64];
+
+ 	va_list args;
+ 	va_start(args, format);
+ 	vsprintf(buffer, format, args);
+ 	va_end(args);
+
+ 	switch(peripheral)
+ 	{
+ 	case PERIPHERAL_USART:
+        // Envia pela UART2 (ST-Link VCP)
+ 	    HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100);
+ 		break;
+
+ 	case PERIPHERAL_USB:
+        // Envia pelo USB Device CDC
+ 		CDC_Transmit_FS ((uint8_t *)buffer, strlen(buffer));
+ 		break;
+
+ 	default:
+ 		break;
+ 	}
+}
+
+/* USER CODE END Application */
