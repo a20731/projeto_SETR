@@ -2,8 +2,9 @@
 /**
   ******************************************************************************
   * File Name          : freertos.c
-  * Description        : Arquitetura RTOS Profissional - Produtor/Consumidor
-  *                      STM32F411 Nucleo - MEEC 2025
+  * Description        : Versão FINAL ROBUSTA - Receção UART via Interrupção Direta
+  *                      - Corrige problema de comandos ignorados (atropelo de \n)
+  *                      - Mantém todas as Tasks 1, 2, 3 e 4
   ******************************************************************************
   */
 /* USER CODE END Header */
@@ -19,53 +20,56 @@
 #include <stdarg.h>
 #include <string.h>
 #include "usbd_cdc_if.h"
-#include "stm32f4xx_hal.h" // Essencial para HAL_GPIO e UART
+#include "stm32f4xx_hal.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-// Identificação da saída de debug
 enum {
  	PERIPHERAL_USART,
  	PERIPHERAL_USB
 };
-
-// Estados internos da Máquina de Estados do LED
-typedef enum {
-    STATE_IDLE,         // Tudo desligado
-    STATE_MODE_A,       // Pisca Continuo (Velocidade variavel)
-    STATE_MODE_B        // Pisca Rápido (3 segundos)
-} OutputState_t;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-// --- HARDWARE MAPPING (NUCLEO F411) ---
-#define BUTTON_PIN         GPIO_PIN_13
-#define BUTTON_PORT        GPIOC
-#define LED_BUZZER_PORT    GPIOA
-#define LED_BUZZER_PIN     GPIO_PIN_5 // LED Verde (Simula Buzzer + LED)
+// --- MAPEAMENTO DE HARDWARE ---
+#define BTN_INT_PIN        GPIO_PIN_13
+#define BTN_INT_PORT       GPIOC
+#define BTN_EXT_PIN        GPIO_PIN_4
+#define BTN_EXT_PORT       GPIOB
+#define LED1_PIN           GPIO_PIN_5
+#define LED1_PORT          GPIOA
+#define BUZZER_PIN         GPIO_PIN_6
+#define BUZZER_PORT        GPIOA
+#define LED2_PIN           GPIO_PIN_0
+#define LED2_PORT          GPIOB
 
-// --- COMANDOS DO SISTEMA (PROTOCOLOS DA QUEUE) ---
-#define CMD_STOP           0x00 // Parar tudo
-#define CMD_START_MODE_A   0x01 // Iniciar Modo A
-#define CMD_START_MODE_B   0x02 // Iniciar Modo B
-#define CMD_CHANGE_SPEED   0x03 // Alterar Frequencia do Modo A
+// --- COMANDOS ---
+#define CMD_STOP           0x00
+#define CMD_MODE_A         0x01
+#define CMD_MODE_B         0x02
+#define CMD_CHANGE_SPEED   0x03
+#define CMD_EMERGENCY      0x04
 
-// --- PARAMETROS DE TEMPO ---
-#define TIMEOUT_MODE_B     150  // 150ms (Modo Rapido)
-#define DURATION_MODE_B    3000 // 3 segundos (Duracao Modo B)
+// --- GLOBAIS ---
+uint8_t usb_rx_buffer[64];
+uint8_t usb_rx_flag = 0;
+uint16_t global_CO2 = 400;
+uint8_t uart_rx_byte[1];
 /* USER CODE END PD */
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-extern UART_HandleTypeDef huart2; // ST-Link UART na Nucleo F411
+extern UART_HandleTypeDef huart2;
 /* USER CODE END Variables */
 
 osThreadId defaultTaskHandle;
 osThreadId myTask_ButtonHandle;
 osThreadId myTask_ControllerHandle;
-osMessageQId myQueue_SysCmdsHandle; // Fila única de comandos
+osThreadId myTask_Led2Handle;
+
+osMessageQId myQueue_SysCmdsHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -75,6 +79,7 @@ void myPrintf(uint16_t peripheral, char *format, ...);
 void StartDefaultTask(void const * argument);
 void StartTask_Button(void const * argument);
 void StartTask_Controller(void const * argument);
+void StartTask_Led2(void const * argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void);
@@ -93,237 +98,255 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
 }
 /* USER CODE END GET_IDLE_TASK_MEMORY */
 
-/**
-  * @brief  FreeRTOS initialization
-  */
 void MX_FREERTOS_Init(void) {
-
-  /* Create the queue(s) */
-  // Fila para comunicar eventos entre Botão e Controlador
-  osMessageQDef(myQueue_SysCmds, 8, uint16_t);
+  osMessageQDef(myQueue_SysCmds, 10, uint16_t);
   myQueue_SysCmdsHandle = osMessageCreate(osMessageQ(myQueue_SysCmds), NULL);
 
-  /* Create the thread(s) */
-  // Task Default (USB e Keep Alive)
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 256);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
-  // Task 1: Leitura Inteligente do Botão (Prioridade Alta para não perder cliques)
-  osThreadDef(myTask_Button, StartTask_Button, osPriorityAboveNormal, 0, 128);
+  osThreadDef(myTask_Button, StartTask_Button, osPriorityAboveNormal, 0, 256);
   myTask_ButtonHandle = osThreadCreate(osThread(myTask_Button), NULL);
 
-  // Task 2: Controlador de Hardware (Prioridade Normal)
-  osThreadDef(myTask_Controller, StartTask_Controller, osPriorityNormal, 0, 128);
+  osThreadDef(myTask_Controller, StartTask_Controller, osPriorityNormal, 0, 256);
   myTask_ControllerHandle = osThreadCreate(osThread(myTask_Controller), NULL);
+
+  osThreadDef(myTask_Led2, StartTask_Led2, osPriorityNormal, 0, 128);
+  myTask_Led2Handle = osThreadCreate(osThread(myTask_Led2), NULL);
 }
 
 /* USER CODE BEGIN Header_StartDefaultTask */
+/**
+ * TASK 4: Monitorização e Log
+ */
 void StartDefaultTask(void const * argument)
 {
-  MX_USB_DEVICE_Init(); // Inicializa USB CDC
-  myPrintf(PERIPHERAL_USART, "--- SISTEMA RTOS INICIADO ---\r\n");
+  MX_USB_DEVICE_Init();
+
+  // Forçar ativação do NVIC (Interrupções) para garantir receção
+  HAL_NVIC_SetPriority(USART2_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(USART2_IRQn);
+  HAL_UART_Receive_IT(&huart2, uart_rx_byte, 1);
+
+  osDelay(1000);
+  myPrintf(PERIPHERAL_USART, "--- SISTEMA INICIADO ---\r\n");
 
   for(;;) {
-	  osDelay(1000); // Sleep longo (Heartbeat)
+      // Log visual de confirmação (a ação já foi feita na interrupção)
+      if (usb_rx_flag) {
+          usb_rx_flag = 0;
+          myPrintf(PERIPHERAL_USART, "Tecla Aceite: %c\r\n", usb_rx_buffer[0]);
+      }
+
+      // Vigilância de CO2 (Task 4)
+      if (global_CO2 > 1000) {
+          myPrintf(PERIPHERAL_USART, "ALERTA: CO2 Critico (%d)!\r\n", global_CO2);
+          osMessagePut(myQueue_SysCmdsHandle, CMD_EMERGENCY, 0);
+          global_CO2 = 400; // Reset simulado
+      }
+	  osDelay(200);
   }
 }
 /* USER CODE END Header_StartDefaultTask */
 
 /* USER CODE BEGIN Header_StartTask_Button */
 /**
-* @brief PRODUTOR: Lê botão e envia comandos para a fila.
-*        Lógica:
-*        - Cliques curtos: Define o Modo (A, B ou Stop).
-*        - Clique longo: Envia comando para alterar velocidade.
-*/
+ * TASK 1: Leitura de Botões (Interno e Externo)
+ */
 void StartTask_Button(void const * argument)
 {
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    GPIO_InitStruct.Pin = BTN_EXT_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    HAL_GPIO_Init(BTN_EXT_PORT, &GPIO_InitStruct);
+
     uint32_t pressTime = 0;
     uint8_t clickCount = 0;
-    uint8_t waitingForRelease = 0;
-    uint8_t longPressHandled = 0; // Evita repetir o comando de long press
+    uint8_t isPressed = 0;
+    uint8_t longPressSent = 0;
 
     for (;;)
     {
-        // 1. Deteção de Pressão (Active Low)
-        if (HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN) == GPIO_PIN_RESET)
-        {
-            // Se acabou de carregar (borda de descida)
-            if (!waitingForRelease) {
-                osDelay(50); // Debounce
-                if (HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN) == GPIO_PIN_RESET) {
-                    pressTime = osKernelSysTick();
-                    waitingForRelease = 1;
-                    longPressHandled = 0;
+        // 1. Botão Interno
+        if (HAL_GPIO_ReadPin(BTN_INT_PORT, BTN_INT_PIN) == GPIO_PIN_RESET) {
+            if (!isPressed) {
+                osDelay(50);
+                if (HAL_GPIO_ReadPin(BTN_INT_PORT, BTN_INT_PIN) == GPIO_PIN_RESET) {
+                    isPressed = 1; pressTime = osKernelSysTick(); longPressSent = 0;
                 }
             }
-
-            // 2. Verifica Long Press (> 1s) ENQUANTO segura o botão
-            if (waitingForRelease && !longPressHandled)
-            {
-                if ((osKernelSysTick() - pressTime) > 1000)
-                {
-                    myPrintf(PERIPHERAL_USART, "BTN: Long Press -> Mudar Velocidade\r\n");
-                    osMessagePut(myQueue_SysCmdsHandle, CMD_CHANGE_SPEED, 0);
-
-                    longPressHandled = 1; // Marca como tratado
-                    clickCount = 0;       // Anula contagem de cliques
+            if (isPressed && !longPressSent && (osKernelSysTick() - pressTime > 1000)) {
+                osMessagePut(myQueue_SysCmdsHandle, CMD_CHANGE_SPEED, 0);
+                longPressSent = 1; clickCount = 0;
+            }
+        }
+        else {
+            if (isPressed) {
+                isPressed = 0;
+                if (!longPressSent) {
+                    clickCount++; pressTime = osKernelSysTick();
                 }
             }
         }
-        else // Botão Solto
-        {
-            if (waitingForRelease)
-            {
-                waitingForRelease = 0;
-
-                // Só conta clique se NÃO foi um long press
-                if (!longPressHandled) {
-                    clickCount++;
-                    pressTime = osKernelSysTick(); // Reinicia timer para timeout de multiplos cliques
-                }
-            }
+        if (clickCount > 0 && !isPressed && (osKernelSysTick() - pressTime > 400)) {
+            if (clickCount == 1) osMessagePut(myQueue_SysCmdsHandle, CMD_MODE_A, 0);
+            else if (clickCount == 2) osMessagePut(myQueue_SysCmdsHandle, CMD_MODE_B, 0);
+            else if (clickCount >= 3) osMessagePut(myQueue_SysCmdsHandle, CMD_STOP, 0);
+            clickCount = 0;
         }
 
-        // 3. Processa Cliques Curtos (após timeout de 400ms sem novos cliques)
-        if (clickCount > 0 && !waitingForRelease)
-        {
-            if ((osKernelSysTick() - pressTime) > 400)
-            {
-                if (clickCount == 1) {
-                    myPrintf(PERIPHERAL_USART, "BTN: 1 Clique -> Modo A\r\n");
-                    osMessagePut(myQueue_SysCmdsHandle, CMD_START_MODE_A, 0);
-                }
-                else if (clickCount == 2) {
-                    myPrintf(PERIPHERAL_USART, "BTN: 2 Cliques -> Modo B\r\n");
-                    osMessagePut(myQueue_SysCmdsHandle, CMD_START_MODE_B, 0);
-                }
-                else if (clickCount >= 3) {
-                    myPrintf(PERIPHERAL_USART, "BTN: 3+ Cliques -> STOP\r\n");
-                    osMessagePut(myQueue_SysCmdsHandle, CMD_STOP, 0);
-                }
-                clickCount = 0; // Reseta contador
+        // 2. Botão Externo (Task 3 Trigger)
+        if (HAL_GPIO_ReadPin(BTN_EXT_PORT, BTN_EXT_PIN) == GPIO_PIN_RESET) {
+            osDelay(50);
+            if (HAL_GPIO_ReadPin(BTN_EXT_PORT, BTN_EXT_PIN) == GPIO_PIN_RESET) {
+                osMessagePut(myQueue_SysCmdsHandle, CMD_EMERGENCY, 0);
+                while(HAL_GPIO_ReadPin(BTN_EXT_PORT, BTN_EXT_PIN) == GPIO_PIN_RESET) osDelay(50);
             }
         }
-
-        osDelay(10); // Yield para libertar CPU
+        osDelay(20);
     }
 }
 /* USER CODE END Header_StartTask_Button */
 
 /* USER CODE BEGIN Header_StartTask_Controller */
 /**
-* @brief CONSUMIDOR: Recebe comandos e gerencia os LEDs.
-*        Gere a frequência do Modo A localmente.
-*/
+ * TASK 2: Buzzer + LED 1
+ */
 void StartTask_Controller(void const * argument)
 {
-    osEvent evt;
-    OutputState_t currentState = STATE_IDLE;
-    uint32_t waitTime = osWaitForever; // Inicialmente dorme para sempre
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin = BUZZER_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(BUZZER_PORT, &GPIO_InitStruct);
 
-    // Variáveis de Estado Interno
-    uint32_t modeB_EntryTime = 0;
-    uint32_t currentFreq_ModeA = 500; // Começa com 500ms
+    osEvent evt;
+    uint8_t mode = 0;
+    uint32_t currentFreqA = 500;
+    uint32_t lastLedToggle = 0;
+    uint32_t modeB_Start = 0;
+    uint8_t logicalState = 0;
 
     for (;;)
     {
-        // Espera Mensagem OU Timeout (para piscar LED)
-        evt = osMessageGet(myQueue_SysCmdsHandle, waitTime);
-
-        // --- CASO 1: Recebeu Comando da Fila ---
-        if (evt.status == osEventMessage)
-        {
+        evt = osMessageGet(myQueue_SysCmdsHandle, 1);
+        if (evt.status == osEventMessage) {
             uint16_t cmd = evt.value.v;
-
-            switch (cmd) {
+            if (cmd != CMD_STOP && cmd != CMD_CHANGE_SPEED) {
+                 xTaskNotifyGive(myTask_Led2Handle);
+            }
+            switch(cmd) {
                 case CMD_STOP:
-                    currentState = STATE_IDLE;
-                    waitTime = osWaitForever; // Dorme até novo comando
-                    HAL_GPIO_WritePin(LED_BUZZER_PORT, LED_BUZZER_PIN, GPIO_PIN_RESET);
-                    myPrintf(PERIPHERAL_USART, "CTRL: Parado\r\n");
+                    mode = 0; logicalState = 0;
+                    HAL_GPIO_WritePin(LED1_PORT, LED1_PIN, RESET);
+                    HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, RESET);
+                    myPrintf(PERIPHERAL_USART, "CTRL: Stop\r\n");
                     break;
-
-                case CMD_START_MODE_A:
-                    currentState = STATE_MODE_A;
-                    waitTime = currentFreq_ModeA; // Usa freq atual
-                    myPrintf(PERIPHERAL_USART, "CTRL: Modo A (Freq: %lu ms)\r\n", currentFreq_ModeA);
+                case CMD_MODE_A:
+                    mode = 1; logicalState = 1; lastLedToggle = osKernelSysTick();
+                    HAL_GPIO_WritePin(LED1_PORT, LED1_PIN, SET);
+                    myPrintf(PERIPHERAL_USART, "CTRL: Modo A\r\n");
                     break;
-
-                case CMD_START_MODE_B:
-                    currentState = STATE_MODE_B;
-                    waitTime = TIMEOUT_MODE_B;
-                    modeB_EntryTime = osKernelSysTick();
-                    myPrintf(PERIPHERAL_USART, "CTRL: Modo B (3s)\r\n");
+                case CMD_MODE_B:
+                    mode = 2; logicalState = 1; lastLedToggle = osKernelSysTick();
+                    modeB_Start = osKernelSysTick();
+                    HAL_GPIO_WritePin(LED1_PORT, LED1_PIN, SET);
+                    myPrintf(PERIPHERAL_USART, "CTRL: Modo B\r\n");
                     break;
-
                 case CMD_CHANGE_SPEED:
-                    // Decrementa 100ms. Se < 100, volta a 500.
-                    if (currentFreq_ModeA > 100) {
-                        currentFreq_ModeA -= 100;
-                    } else {
-                        currentFreq_ModeA = 500;
-                    }
-                    myPrintf(PERIPHERAL_USART, "CONFIG: Nova Freq A = %lu ms\r\n", currentFreq_ModeA);
-
-                    // Se Modo A estiver ativo, atualiza o timer imediatamente
-                    if (currentState == STATE_MODE_A) {
-                        waitTime = currentFreq_ModeA;
-                    }
+                    if(currentFreqA > 100) currentFreqA -= 100; else currentFreqA = 500;
+                    myPrintf(PERIPHERAL_USART, "Speed: %lu\r\n", currentFreqA);
+                    break;
+                case CMD_EMERGENCY:
+                    mode = 3; logicalState = 1; lastLedToggle = osKernelSysTick();
+                    myPrintf(PERIPHERAL_USART, "CTRL: EMERGENCIA!\r\n");
                     break;
             }
         }
-        // --- CASO 2: Timeout () ---
-        else if (evt.status == osEventTimeout)
-        {
-            switch (currentState) {
-                case STATE_IDLE:
-                    HAL_GPIO_WritePin(LED_BUZZER_PORT, LED_BUZZER_PIN, GPIO_PIN_RESET);
-                    waitTime = osWaitForever; // Segurança
-                    break;
 
-                case STATE_MODE_A:
-                    HAL_GPIO_TogglePin(LED_BUZZER_PORT, LED_BUZZER_PIN);
-                    // Garante que usa a frequencia atualizada
-                    waitTime = currentFreq_ModeA;
-                    break;
+        if (mode != 0) {
+            uint32_t now = osKernelSysTick();
+            uint32_t period = (mode == 2) ? 150 : (mode == 3 ? 100 : currentFreqA);
+            if (now - lastLedToggle >= period) {
+                lastLedToggle = now; logicalState = !logicalState;
+                HAL_GPIO_WritePin(LED1_PORT, LED1_PIN, logicalState ? SET : RESET);
+            }
+            if (logicalState) HAL_GPIO_TogglePin(BUZZER_PORT, BUZZER_PIN);
+            else HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, RESET);
 
-                case STATE_MODE_B:
-                    // Verifica se acabou os 3 segundos
-                    if ((osKernelSysTick() - modeB_EntryTime) >= DURATION_MODE_B) {
-                        currentState = STATE_IDLE;
-                        waitTime = osWaitForever;
-                        HAL_GPIO_WritePin(LED_BUZZER_PORT, LED_BUZZER_PIN, GPIO_PIN_RESET);
-                        myPrintf(PERIPHERAL_USART, "CTRL: Fim Auto Modo B\r\n");
-                    } else {
-                        HAL_GPIO_TogglePin(LED_BUZZER_PORT, LED_BUZZER_PIN);
-                        // Mantem frequencia rapida fixa
-                        waitTime = TIMEOUT_MODE_B;
-                    }
-                    break;
+            if (mode == 2 && (now - modeB_Start > 3000)) {
+                mode = 0; HAL_GPIO_WritePin(LED1_PORT, LED1_PIN, RESET);
+                HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, RESET);
             }
         }
     }
 }
 /* USER CODE END Header_StartTask_Controller */
 
+/* USER CODE BEGIN Header_StartTask_Led2 */
+/**
+ * TASK 3: LED 2 Independente (1s ativo + 3s extra = 4s total)
+ */
+void StartTask_Led2(void const * argument)
+{
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    GPIO_InitStruct.Pin = LED2_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(LED2_PORT, &GPIO_InitStruct);
+
+    for(;;) {
+        ulTaskNotifyTake(pdTRUE, osWaitForever);
+        uint32_t endTime = osKernelSysTick() + 1000 + 3000;
+        while (osKernelSysTick() < endTime) {
+            HAL_GPIO_TogglePin(LED2_PORT, LED2_PIN);
+            osDelay(100); // 5 Hz
+        }
+        HAL_GPIO_WritePin(LED2_PORT, LED2_PIN, RESET);
+    }
+}
+/* USER CODE END Header_StartTask_Led2 */
+
 /* USER CODE BEGIN Application */
+// CALLBACK DA UART: Processa comandos instantaneamente
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if(huart->Instance == USART2) {
+        char cmd = (char)uart_rx_byte[0];
+
+        // Filtra caracteres de controle (\r, \n)
+        if (cmd != '\r' && cmd != '\n') {
+            if (cmd == 'S' || cmd == 's') {
+                osMessagePut(myQueue_SysCmdsHandle, CMD_STOP, 0);
+            }
+            else if (cmd == 'C' || cmd == 'c') {
+                global_CO2 += 500;
+            }
+            // Guarda para a DefaultTask mostrar no Log
+            usb_rx_buffer[0] = cmd;
+            usb_rx_flag = 1;
+        }
+        // Reativa a receção imediatamente
+        HAL_UART_Receive_IT(&huart2, uart_rx_byte, 1);
+    }
+}
+
 void myPrintf(uint16_t peripheral, char *format, ...)
 {
- 	char buffer[64];
+ 	char buffer[128];
  	va_list args;
  	va_start(args, format);
  	vsprintf(buffer, format, args);
  	va_end(args);
 
- 	switch(peripheral)
- 	{
- 	case PERIPHERAL_USART:
+ 	if(peripheral == PERIPHERAL_USART)
  	    HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100);
- 		break;
- 	case PERIPHERAL_USB:
+ 	else
  		CDC_Transmit_FS ((uint8_t *)buffer, strlen(buffer));
- 		break;
- 	}
 }
 /* USER CODE END Application */
