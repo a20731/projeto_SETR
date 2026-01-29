@@ -8,7 +8,7 @@
                         {
                             "codegenResult": 0,
                             "column": 25,
-                            "durationMicroseconds": 346,
+                            "durationMicroseconds": 347,
                             "functionName": "bottom",
                             "line": 16,
                             "message": ""
@@ -16,7 +16,7 @@
                         {
                             "codegenResult": 0,
                             "column": 24,
-                            "durationMicroseconds": 95,
+                            "durationMicroseconds": 77,
                             "functionName": "right",
                             "line": 17,
                             "message": ""
@@ -24,233 +24,209 @@
                         {
                             "codegenResult": 2,
                             "column": 35,
-                            "durationMicroseconds": 2376,
+                            "durationMicroseconds": 169,
                             "functionName": "temperatura",
-                            "line": 31,
+                            "line": 28,
                             "message": "Cannot generate efficient code for call to untyped JavaScript function"
                         },
                         {
                             "codegenResult": 0,
                             "column": 35,
-                            "durationMicroseconds": 2176,
+                            "durationMicroseconds": 144,
                             "functionName": "temColisao",
-                            "line": 34,
+                            "line": 31,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 37,
-                            "durationMicroseconds": 162,
+                            "durationMicroseconds": 97,
                             "functionName": "estaCapotado",
-                            "line": 37,
+                            "line": 34,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 32,
-                            "durationMicroseconds": 109,
+                            "durationMicroseconds": 111,
                             "functionName": "temFumo",
-                            "line": 40,
+                            "line": 37,
                             "message": ""
                         },
                         {
                             "codegenResult": 2,
                             "column": 34,
-                            "durationMicroseconds": 150,
+                            "durationMicroseconds": 127,
                             "functionName": "numObjetos",
-                            "line": 43,
+                            "line": 40,
                             "message": "Cannot generate efficient code for call to untyped JavaScript function"
                         },
                         {
                             "codegenResult": 0,
                             "column": 22,
-                            "durationMicroseconds": 82,
+                            "durationMicroseconds": 72,
                             "functionName": "top",
-                            "line": 56,
+                            "line": 51,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 35,
-                            "durationMicroseconds": 72,
+                            "durationMicroseconds": 70,
                             "functionName": "horizontalCenter",
+                            "line": 52,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 0,
+                            "column": 27,
+                            "durationMicroseconds": 44,
+                            "functionName": "centerIn",
                             "line": 57,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
-                            "column": 27,
-                            "durationMicroseconds": 47,
-                            "functionName": "centerIn",
-                            "line": 62,
-                            "message": ""
-                        },
-                        {
-                            "codegenResult": 0,
                             "column": 30,
-                            "durationMicroseconds": 108,
+                            "durationMicroseconds": 99,
                             "functionName": "top",
-                            "line": 77,
+                            "line": 72,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 43,
-                            "durationMicroseconds": 73,
+                            "durationMicroseconds": 71,
                             "functionName": "horizontalCenter",
-                            "line": 78,
+                            "line": 73,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 42,
-                            "durationMicroseconds": 73,
+                            "durationMicroseconds": 60,
                             "functionName": "valorAtual",
-                            "line": 86,
+                            "line": 81,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 38,
-                            "durationMicroseconds": 701,
+                            "durationMicroseconds": 85,
                             "functionName": "onValorAtualChanged",
-                            "line": 87,
+                            "line": 82,
                             "message": ""
                         },
                         {
                             "codegenResult": 2,
                             "column": 26,
-                            "durationMicroseconds": 4184,
+                            "durationMicroseconds": 1833,
                             "functionName": "onPaint",
-                            "line": 89,
+                            "line": 84,
                             "message": "Cannot generate efficient code for call to untyped JavaScript function"
                         },
                         {
                             "codegenResult": 0,
                             "column": 35,
-                            "durationMicroseconds": 59,
+                            "durationMicroseconds": 77,
                             "functionName": "centerIn",
-                            "line": 84,
+                            "line": 79,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 88,
-                            "durationMicroseconds": 68,
+                            "durationMicroseconds": 95,
                             "functionName": "type",
-                            "line": 116,
+                            "line": 111,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 35,
-                            "durationMicroseconds": 46,
+                            "durationMicroseconds": 52,
                             "functionName": "centerIn",
-                            "line": 120,
+                            "line": 115,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 27,
-                            "durationMicroseconds": 68,
+                            "durationMicroseconds": 99,
                             "functionName": "text",
-                            "line": 122,
+                            "line": 117,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 47,
-                            "durationMicroseconds": 69,
+                            "durationMicroseconds": 81,
                             "functionName": "horizontalCenter",
-                            "line": 126,
+                            "line": 121,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 47,
-                            "durationMicroseconds": 64,
+                            "durationMicroseconds": 73,
                             "functionName": "horizontalCenter",
-                            "line": 132,
+                            "line": 127,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 24,
-                            "durationMicroseconds": 160,
+                            "durationMicroseconds": 263,
                             "functionName": "color",
-                            "line": 154,
+                            "line": 148,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 33,
-                            "durationMicroseconds": 103,
+                            "durationMicroseconds": 213,
                             "functionName": "onAtivoChanged",
-                            "line": 165,
+                            "line": 159,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 31,
-                            "durationMicroseconds": 119,
+                            "durationMicroseconds": 222,
                             "functionName": "color",
-                            "line": 156,
+                            "line": 150,
                             "message": ""
                         },
                         {
                             "codegenResult": 2,
                             "column": 30,
-                            "durationMicroseconds": 568,
+                            "durationMicroseconds": 48,
                             "functionName": "running",
-                            "line": 160,
+                            "line": 154,
                             "message": "Cannot access value for name ativo"
                         },
                         {
                             "codegenResult": 0,
                             "column": 28,
-                            "durationMicroseconds": 127,
+                            "durationMicroseconds": 60,
                             "functionName": "loops",
-                            "line": 161,
+                            "line": 155,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 39,
-                            "durationMicroseconds": 101,
+                            "durationMicroseconds": 50,
                             "functionName": "centerIn",
-                            "line": 168,
+                            "line": 162,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 32,
-                            "durationMicroseconds": 241,
+                            "durationMicroseconds": 245,
                             "functionName": "color",
-                            "line": 174,
-                            "message": ""
-                        },
-                        {
-                            "codegenResult": 0,
-                            "column": 35,
-                            "durationMicroseconds": 99,
-                            "functionName": "text",
-                            "line": 180,
-                            "message": ""
-                        },
-                        {
-                            "codegenResult": 0,
-                            "column": 36,
-                            "durationMicroseconds": 221,
-                            "functionName": "color",
-                            "line": 183,
-                            "message": ""
-                        },
-                        {
-                            "codegenResult": 0,
-                            "column": 38,
-                            "durationMicroseconds": 205,
-                            "functionName": "visible",
-                            "line": 190,
+                            "line": 168,
                             "message": ""
                         },
                         {
@@ -258,23 +234,39 @@
                             "column": 35,
                             "durationMicroseconds": 75,
                             "functionName": "text",
-                            "line": 191,
+                            "line": 174,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 0,
+                            "column": 36,
+                            "durationMicroseconds": 256,
+                            "functionName": "color",
+                            "line": 176,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 0,
+                            "column": 38,
+                            "durationMicroseconds": 93,
+                            "functionName": "visible",
+                            "line": 182,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 0,
+                            "column": 35,
+                            "durationMicroseconds": 53,
+                            "functionName": "text",
+                            "line": 183,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 24,
-                            "durationMicroseconds": 80,
+                            "durationMicroseconds": 55,
                             "functionName": "ativo",
-                            "line": 203,
-                            "message": ""
-                        },
-                        {
-                            "codegenResult": 0,
-                            "column": 24,
-                            "durationMicroseconds": 99,
-                            "functionName": "ativo",
-                            "line": 210,
+                            "line": 195,
                             "message": ""
                         },
                         {
@@ -282,23 +274,31 @@
                             "column": 24,
                             "durationMicroseconds": 82,
                             "functionName": "ativo",
-                            "line": 217,
+                            "line": 202,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 24,
-                            "durationMicroseconds": 153,
+                            "durationMicroseconds": 52,
                             "functionName": "ativo",
-                            "line": 224,
+                            "line": 209,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 0,
+                            "column": 24,
+                            "durationMicroseconds": 96,
+                            "functionName": "ativo",
+                            "line": 216,
                             "message": ""
                         },
                         {
                             "codegenResult": 0,
                             "column": 29,
-                            "durationMicroseconds": 305,
+                            "durationMicroseconds": 272,
                             "functionName": "valorExtra",
-                            "line": 226,
+                            "line": 218,
                             "message": ""
                         }
                     ],

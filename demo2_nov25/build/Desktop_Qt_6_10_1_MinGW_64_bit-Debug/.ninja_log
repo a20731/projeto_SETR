@@ -86,3 +86,16 @@
 500	621	7913505168054800	CMakeFiles/appdemo2_nov25.dir/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/rcc/qrc_appdemo2_nov25_raw_qml_0.cpp.obj	831e8caef96dc7f4
 497	4440	7913505168028746	CMakeFiles/appdemo2_nov25.dir/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.rcc/qmlcache/appdemo2_nov25_Main_qml.cpp.obj	3a704bcd60f2d4c3
 4440	5389	7913505207449286	appdemo2_nov25.exe	65d43eac4d5df80e
+57	137	7914179714311269	.qt/appdemo2_nov25_qml.txt	73c850e6899064b
+57	137	7914179714311269	D:/SETR_MESTRADO/projeto_SETR/demo2_nov25/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/appdemo2_nov25_qml.txt	73c850e6899064b
+62	294	7914179715875884	.qt/qml_imports/appdemo2_nov25_build.cmake	57720fe802759cfa
+62	294	7914179715875884	D:/SETR_MESTRADO/projeto_SETR/demo2_nov25/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/qml_imports/appdemo2_nov25_build.cmake	57720fe802759cfa
+297	350	7914179716463474	.qt/rcc/qrc_appdemo2_nov25_raw_qml_0.cpp	bede36d21e63fc28
+297	350	7914179716463474	D:/SETR_MESTRADO/projeto_SETR/demo2_nov25/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/rcc/qrc_appdemo2_nov25_raw_qml_0.cpp	bede36d21e63fc28
+294	488	7914179717702294	.rcc/qmlcache/appdemo2_nov25_Main_qml.cpp	f88574b8d4b272ed
+294	488	7914179717702294	.rcc/qmlcache/appdemo2_nov25_Main_qml.cpp.aotstats	f88574b8d4b272ed
+294	488	7914179717702294	D:/SETR_MESTRADO/projeto_SETR/demo2_nov25/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.rcc/qmlcache/appdemo2_nov25_Main_qml.cpp	f88574b8d4b272ed
+294	488	7914179717702294	D:/SETR_MESTRADO/projeto_SETR/demo2_nov25/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.rcc/qmlcache/appdemo2_nov25_Main_qml.cpp.aotstats	f88574b8d4b272ed
+492	668	7914179717997070	CMakeFiles/appdemo2_nov25.dir/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/rcc/qrc_appdemo2_nov25_raw_qml_0.cpp.obj	831e8caef96dc7f4
+489	3721	7914179717977005	CMakeFiles/appdemo2_nov25.dir/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.rcc/qmlcache/appdemo2_nov25_Main_qml.cpp.obj	3a704bcd60f2d4c3
+3721	4444	7914179750296094	appdemo2_nov25.exe	65d43eac4d5df80e

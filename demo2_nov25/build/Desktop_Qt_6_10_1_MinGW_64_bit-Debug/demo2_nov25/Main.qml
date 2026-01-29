@@ -7,7 +7,7 @@ Window {
     width: 850
     height: 550
     visible: true
-    title: qsTr("Dashboard Pro")
+    title: qsTr("Dashboard LAB")
     color: "#121212"
 
     // Status do Python (Canto inferior direito)
@@ -22,9 +22,6 @@ Window {
         z: 10 // Garante que fica por cima de tudo
     }
 
-    // ===============================================================
-    // RECEBORES DE DADOS (INVISÍVEIS)
-    // ===============================================================
     Item {
         id: dadosSensor
 
@@ -44,12 +41,10 @@ Window {
         Text { id: recebeObj; objectName: "valObjetos"; text: "0"; visible: false }
     }
 
-    // ===============================================================
-    // INTERFACE VISUAL
-    // ===============================================================
+
 
     Text {
-        text: "SISTEMA DE SEGURANÇA INTELIGENTE"
+        text: "SISTEMA DE SEGURANÇA LAB /SETR"
         color: "white"
         font.bold: true
         font.pixelSize: 24
@@ -62,7 +57,7 @@ Window {
         anchors.centerIn: parent
         spacing: 40
 
-        // --- LADO ESQUERDO: GAUGE ---
+        // --- LADO ESQUERDO
         Rectangle {
             width: 250; height: 250
             color: "#1e1e1e"
@@ -134,13 +129,12 @@ Window {
             }
         }
 
-        // --- LADO DIREITO: ALERTAS ---
+        // --- LADO DIREITO:
         ColumnLayout {
             spacing: 15
 
-            // --- COMPONENTE CORRIGIDO ---
             component AlertaBox : Rectangle {
-                id: rootBox // <--- DEI UM NOME AO COMPONENTE
+                id: rootBox
 
                 property string titulo: "ALERTA"
                 property bool ativo: false
@@ -179,13 +173,11 @@ Window {
                         Text {
                             text: rootBox.titulo // Usa rootBox.titulo (AGORA FUNCIONA)
 
-                            // Mudei a cor de "desligado" para #cccccc (mais claro) para veres melhor
                             color: rootBox.ativo ? "white" : "#cccccc"
                             font.bold: true
                             font.pixelSize: 16
                         }
 
-                        // Valor Extra (Contador de objetos)
                         Text {
                             visible: rootBox.valorExtra !== ""
                             text: rootBox.valorExtra
