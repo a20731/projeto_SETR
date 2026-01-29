@@ -1,0 +1,46 @@
+{
+    "classes": [
+        {
+            "className": "INUTIL",
+            "lineNumber": 6,
+            "object": true,
+            "qualifiedClassName": "INUTIL",
+            "signals": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "i",
+                            "type": "int"
+                        },
+                        {
+                            "name": "str",
+                            "type": "QString"
+                        }
+                    ],
+                    "index": 0,
+                    "lineNumber": 16,
+                    "name": "terminei",
+                    "returnType": "void"
+                }
+            ],
+            "slots": [
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 13,
+                    "name": "arranca",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "inutil.h",
+    "outputRevision": 69
+}

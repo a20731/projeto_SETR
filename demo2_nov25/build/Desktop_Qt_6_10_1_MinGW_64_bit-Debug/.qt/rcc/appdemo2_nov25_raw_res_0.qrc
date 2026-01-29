@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/qt/qml/demo2_nov25/">
+    <file alias="warning.png">D:/SETR_MESTRADO/projeto_SETR/demo2_nov25/warning.png</file>
+  </qresource>
+</RCC>
+

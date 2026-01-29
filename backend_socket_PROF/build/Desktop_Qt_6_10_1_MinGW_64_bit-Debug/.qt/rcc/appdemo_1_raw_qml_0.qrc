@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/qt/qml/demo_1/">
+    <file alias="Main.qml">D:/SETR_MESTRADO/projeto_SETR/backend_socket_PROF/Main.qml</file>
+  </qresource>
+</RCC>
+

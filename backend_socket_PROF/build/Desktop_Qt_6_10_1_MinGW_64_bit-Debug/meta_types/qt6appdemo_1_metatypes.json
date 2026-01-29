@@ -1,0 +1,137 @@
+[
+    {
+        "classes": [
+            {
+                "className": "Backend",
+                "lineNumber": 11,
+                "object": true,
+                "qualifiedClassName": "Backend",
+                "signals": [
+                    {
+                        "access": "public",
+                        "index": 0,
+                        "lineNumber": 18,
+                        "name": "numero10",
+                        "returnType": "void"
+                    }
+                ],
+                "slots": [
+                    {
+                        "access": "public",
+                        "index": 1,
+                        "lineNumber": 21,
+                        "name": "update",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "i",
+                                "type": "int"
+                            },
+                            {
+                                "name": "str",
+                                "type": "QString"
+                            }
+                        ],
+                        "index": 2,
+                        "lineNumber": 22,
+                        "name": "muda_cor",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "i",
+                                "type": "int"
+                            }
+                        ],
+                        "index": 3,
+                        "isCloned": true,
+                        "lineNumber": 22,
+                        "name": "muda_cor",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 4,
+                        "isCloned": true,
+                        "lineNumber": 22,
+                        "name": "muda_cor",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 5,
+                        "lineNumber": 23,
+                        "name": "ler_rs232",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 6,
+                        "lineNumber": 24,
+                        "name": "readTcpData",
+                        "returnType": "void"
+                    }
+                ],
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QObject"
+                    }
+                ]
+            }
+        ],
+        "inputFile": "backend.h",
+        "outputRevision": 69
+    },
+    {
+        "classes": [
+            {
+                "className": "INUTIL",
+                "lineNumber": 6,
+                "object": true,
+                "qualifiedClassName": "INUTIL",
+                "signals": [
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "i",
+                                "type": "int"
+                            },
+                            {
+                                "name": "str",
+                                "type": "QString"
+                            }
+                        ],
+                        "index": 0,
+                        "lineNumber": 16,
+                        "name": "terminei",
+                        "returnType": "void"
+                    }
+                ],
+                "slots": [
+                    {
+                        "access": "public",
+                        "index": 1,
+                        "lineNumber": 13,
+                        "name": "arranca",
+                        "returnType": "void"
+                    }
+                ],
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QObject"
+                    }
+                ]
+            }
+        ],
+        "inputFile": "inutil.h",
+        "outputRevision": 69
+    }
+]

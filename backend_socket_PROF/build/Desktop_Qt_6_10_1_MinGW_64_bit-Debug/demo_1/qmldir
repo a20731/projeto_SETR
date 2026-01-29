@@ -1,0 +1,6 @@
+module demo_1
+typeinfo appdemo_1.qmltypes
+prefer :/qt/qml/demo_1/
+Main 1.0 Main.qml
+depends QtQuick
+

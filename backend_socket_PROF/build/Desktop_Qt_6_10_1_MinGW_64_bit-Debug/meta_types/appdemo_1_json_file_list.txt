@@ -1,0 +1,2 @@
+D:/SETR_MESTRADO/projeto_SETR/backend_socket_PROF/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/appdemo_1_autogen/include/../EWIEGA46WW/moc_backend.cpp.json
+D:/SETR_MESTRADO/projeto_SETR/backend_socket_PROF/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/appdemo_1_autogen/include/../EWIEGA46WW/moc_inutil.cpp.json

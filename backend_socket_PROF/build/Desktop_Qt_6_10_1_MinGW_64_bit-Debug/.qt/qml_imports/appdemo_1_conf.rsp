@@ -1,0 +1,14 @@
+-rootPath
+D:/SETR_MESTRADO/projeto_SETR/backend_socket_PROF
+-cmake-output
+-output-file
+D:/SETR_MESTRADO/projeto_SETR/backend_socket_PROF/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/qml_imports/appdemo_1_conf.cmake
+-importPath
+D:/SETR_MESTRADO/projeto_SETR/backend_socket_PROF/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/demo_1
+-importPath
+D:/SETR_MESTRADO/projeto_SETR/backend_socket_PROF/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug
+-importPath
+C:/Qt/6.10.1/mingw_64/qml
+-qrcFiles
+D:/SETR_MESTRADO/projeto_SETR/backend_socket_PROF/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/rcc/qmake_demo_1.qrc
+D:/SETR_MESTRADO/projeto_SETR/backend_socket_PROF/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/rcc/appdemo_1_raw_qml_0.qrc

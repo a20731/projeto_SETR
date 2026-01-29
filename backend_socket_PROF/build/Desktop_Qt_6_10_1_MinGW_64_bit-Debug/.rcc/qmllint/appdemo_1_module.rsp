@@ -1,0 +1,10 @@
+-I
+D:/SETR_MESTRADO/projeto_SETR/backend_socket_PROF/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug
+-I
+C:/Qt/6.10.1/mingw_64/qml
+--resource
+D:/SETR_MESTRADO/projeto_SETR/backend_socket_PROF/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/rcc/qmake_demo_1.qrc
+--resource
+D:/SETR_MESTRADO/projeto_SETR/backend_socket_PROF/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/rcc/appdemo_1_raw_qml_0.qrc
+--module
+demo_1

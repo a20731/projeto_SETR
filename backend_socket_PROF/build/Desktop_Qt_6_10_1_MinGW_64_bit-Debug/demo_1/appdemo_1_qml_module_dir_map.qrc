@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/">
+    <file alias="/qt/qml/demo_1">D:/SETR_MESTRADO/projeto_SETR/backend_socket_PROF/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/demo_1</file>
+
+  </qresource>
+</RCC>

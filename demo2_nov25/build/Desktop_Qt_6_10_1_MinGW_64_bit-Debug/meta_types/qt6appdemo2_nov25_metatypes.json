@@ -1,0 +1,36 @@
+[
+    {
+        "classes": [
+            {
+                "className": "Backend",
+                "lineNumber": 9,
+                "object": true,
+                "qualifiedClassName": "Backend",
+                "slots": [
+                    {
+                        "access": "public",
+                        "index": 0,
+                        "lineNumber": 16,
+                        "name": "readSerial",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 1,
+                        "lineNumber": 17,
+                        "name": "readTcpData",
+                        "returnType": "void"
+                    }
+                ],
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QObject"
+                    }
+                ]
+            }
+        ],
+        "inputFile": "backend.h",
+        "outputRevision": 69
+    }
+]

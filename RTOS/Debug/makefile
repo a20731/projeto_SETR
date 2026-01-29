@@ -68,8 +68,8 @@ all: main-build
 main-build: RTOS_TESTE.elf secondary-outputs
 
 # Tool invocations
-RTOS_TESTE.elf RTOS_TESTE.map: $(OBJS) $(USER_OBJS) C:\Users\WindowsPC\STM32CubeIDE\workspace_1.19.0\RTOS_TESTE\STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "RTOS_TESTE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\WindowsPC\STM32CubeIDE\workspace_1.19.0\RTOS_TESTE\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="RTOS_TESTE.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+RTOS_TESTE.elf RTOS_TESTE.map: $(OBJS) $(USER_OBJS) D:\SETR_MESTRADO\projeto_SETR\RTOS\STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "RTOS_TESTE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\SETR_MESTRADO\projeto_SETR\RTOS\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="RTOS_TESTE.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

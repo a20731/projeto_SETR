@@ -1,0 +1,6 @@
+module demo2_nov25
+typeinfo appdemo2_nov25.qmltypes
+prefer :/qt/qml/demo2_nov25/
+Main 254.0 Main.qml
+depends QtQuick
+

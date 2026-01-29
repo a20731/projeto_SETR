@@ -1,0 +1,55 @@
+{
+    "formatRevision": 1,
+    "modules": [
+        {
+            "moduleFiles": [
+                {
+                    "entries": [
+                        {
+                            "codegenResult": 0,
+                            "column": 15,
+                            "durationMicroseconds": 419,
+                            "functionName": "text",
+                            "line": 13,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 0,
+                            "column": 12,
+                            "durationMicroseconds": 296,
+                            "functionName": "x",
+                            "line": 14,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 0,
+                            "column": 12,
+                            "durationMicroseconds": 256,
+                            "functionName": "y",
+                            "line": 15,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 0,
+                            "column": 12,
+                            "durationMicroseconds": 271,
+                            "functionName": "x",
+                            "line": 28,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 0,
+                            "column": 12,
+                            "durationMicroseconds": 239,
+                            "functionName": "y",
+                            "line": 29,
+                            "message": ""
+                        }
+                    ],
+                    "filePath": "D:/SETR_MESTRADO/projeto_SETR/backend_socket_PROF/Main.qml"
+                }
+            ],
+            "moduleId": "demo_1(appdemo_1)"
+        }
+    ]
+}

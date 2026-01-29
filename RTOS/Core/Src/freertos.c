@@ -2,9 +2,8 @@
 /**
   ******************************************************************************
   * File Name          : freertos.c
-  * Description        : Versão FINAL ROBUSTA - Receção UART via Interrupção Direta
-  *                      - Corrige problema de comandos ignorados (atropelo de \n)
-  *                      - Mantém todas as Tasks 1, 2, 3 e 4
+  * Description        : Versão FINAL - Inclui Task de Telemetria Aleatória (CMD T)
+  *                      Mantém todas as funcionalidades anteriores (LEDs, Buzzer, CO2)
   ******************************************************************************
   */
 /* USER CODE END Header */
@@ -19,6 +18,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdlib.h> // Adicionado para rand()
 #include "usbd_cdc_if.h"
 #include "stm32f4xx_hal.h"
 /* USER CODE END Includes */
@@ -57,6 +57,7 @@ uint8_t usb_rx_buffer[64];
 uint8_t usb_rx_flag = 0;
 uint16_t global_CO2 = 400;
 uint8_t uart_rx_byte[1];
+uint8_t telemetry_active = 0; // Flag para o comando 'T'
 /* USER CODE END PD */
 
 /* Private variables ---------------------------------------------------------*/
@@ -68,6 +69,7 @@ osThreadId defaultTaskHandle;
 osThreadId myTask_ButtonHandle;
 osThreadId myTask_ControllerHandle;
 osThreadId myTask_Led2Handle;
+osThreadId myTask_TelemetryHandle; // Handle da nova task
 
 osMessageQId myQueue_SysCmdsHandle;
 
@@ -80,6 +82,7 @@ void StartDefaultTask(void const * argument);
 void StartTask_Button(void const * argument);
 void StartTask_Controller(void const * argument);
 void StartTask_Led2(void const * argument);
+void StartTask_Telemetry(void const * argument); // Protótipo da telemetria
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void);
@@ -113,17 +116,16 @@ void MX_FREERTOS_Init(void) {
 
   osThreadDef(myTask_Led2, StartTask_Led2, osPriorityNormal, 0, 128);
   myTask_Led2Handle = osThreadCreate(osThread(myTask_Led2), NULL);
+
+  // Nova Task: Telemetria (Baixa prioridade para não afetar o tempo real dos LEDs)
+  osThreadDef(myTask_Telemetry, StartTask_Telemetry, osPriorityLow, 0, 256);
+  myTask_TelemetryHandle = osThreadCreate(osThread(myTask_Telemetry), NULL);
 }
 
 /* USER CODE BEGIN Header_StartDefaultTask */
-/**
- * TASK 4: Monitorização e Log
- */
 void StartDefaultTask(void const * argument)
 {
   MX_USB_DEVICE_Init();
-
-  // Forçar ativação do NVIC (Interrupções) para garantir receção
   HAL_NVIC_SetPriority(USART2_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(USART2_IRQn);
   HAL_UART_Receive_IT(&huart2, uart_rx_byte, 1);
@@ -132,27 +134,46 @@ void StartDefaultTask(void const * argument)
   myPrintf(PERIPHERAL_USART, "--- SISTEMA INICIADO ---\r\n");
 
   for(;;) {
-      // Log visual de confirmação (a ação já foi feita na interrupção)
-      if (usb_rx_flag) {
-          usb_rx_flag = 0;
-          myPrintf(PERIPHERAL_USART, "Tecla Aceite: %c\r\n", usb_rx_buffer[0]);
-      }
-
-      // Vigilância de CO2 (Task 4)
       if (global_CO2 > 1000) {
           myPrintf(PERIPHERAL_USART, "ALERTA: CO2 Critico (%d)!\r\n", global_CO2);
           osMessagePut(myQueue_SysCmdsHandle, CMD_EMERGENCY, 0);
-          global_CO2 = 400; // Reset simulado
+          global_CO2 = 400;
       }
 	  osDelay(200);
   }
 }
 /* USER CODE END Header_StartDefaultTask */
 
-/* USER CODE BEGIN Header_StartTask_Button */
+/* USER CODE BEGIN Header_StartTask_Telemetry */
 /**
- * TASK 1: Leitura de Botões (Interno e Externo)
+ * TASK: Envia dados aleatórios no formato exato da imagem quando ativado por 'T'
  */
+void StartTask_Telemetry(void const * argument)
+{
+    for(;;)
+    {
+        if(telemetry_active)
+        {
+            // Gerar valores aleatórios conforme pedido
+            int col = rand() % 2;           // 0 ou 1
+            int cap = rand() % 2;           // 0 ou 1 (mantido "caputado" como pedido)
+            int fum = rand() % 2;           // 0 ou 1
+            int tem = 18 + (rand() % 23);   // 18 a 40
+
+            // Formato de saída exato para compatibilidade com o outro software
+            myPrintf(PERIPHERAL_USART, "colisao: %d\r\n", col);
+            myPrintf(PERIPHERAL_USART, "caputado: %d\r\n", cap);
+            myPrintf(PERIPHERAL_USART, "fumo: %d\r\n", fum);
+            myPrintf(PERIPHERAL_USART, "temperatura: %d\r\n", tem);
+        }
+
+        // Envia a cada 1 segundo
+        osDelay(1000);
+    }
+}
+/* USER CODE END Header_StartTask_Telemetry */
+
+/* USER CODE BEGIN Header_StartTask_Button */
 void StartTask_Button(void const * argument)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -169,7 +190,6 @@ void StartTask_Button(void const * argument)
 
     for (;;)
     {
-        // 1. Botão Interno
         if (HAL_GPIO_ReadPin(BTN_INT_PORT, BTN_INT_PIN) == GPIO_PIN_RESET) {
             if (!isPressed) {
                 osDelay(50);
@@ -197,7 +217,6 @@ void StartTask_Button(void const * argument)
             clickCount = 0;
         }
 
-        // 2. Botão Externo (Task 3 Trigger)
         if (HAL_GPIO_ReadPin(BTN_EXT_PORT, BTN_EXT_PIN) == GPIO_PIN_RESET) {
             osDelay(50);
             if (HAL_GPIO_ReadPin(BTN_EXT_PORT, BTN_EXT_PIN) == GPIO_PIN_RESET) {
@@ -211,9 +230,6 @@ void StartTask_Button(void const * argument)
 /* USER CODE END Header_StartTask_Button */
 
 /* USER CODE BEGIN Header_StartTask_Controller */
-/**
- * TASK 2: Buzzer + LED 1
- */
 void StartTask_Controller(void const * argument)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -287,9 +303,6 @@ void StartTask_Controller(void const * argument)
 /* USER CODE END Header_StartTask_Controller */
 
 /* USER CODE BEGIN Header_StartTask_Led2 */
-/**
- * TASK 3: LED 2 Independente (1s ativo + 3s extra = 4s total)
- */
 void StartTask_Led2(void const * argument)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -305,7 +318,7 @@ void StartTask_Led2(void const * argument)
         uint32_t endTime = osKernelSysTick() + 1000 + 3000;
         while (osKernelSysTick() < endTime) {
             HAL_GPIO_TogglePin(LED2_PORT, LED2_PIN);
-            osDelay(100); // 5 Hz
+            osDelay(100);
         }
         HAL_GPIO_WritePin(LED2_PORT, LED2_PIN, RESET);
     }
@@ -313,13 +326,11 @@ void StartTask_Led2(void const * argument)
 /* USER CODE END Header_StartTask_Led2 */
 
 /* USER CODE BEGIN Application */
-// CALLBACK DA UART: Processa comandos instantaneamente
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     if(huart->Instance == USART2) {
         char cmd = (char)uart_rx_byte[0];
 
-        // Filtra caracteres de controle (\r, \n)
         if (cmd != '\r' && cmd != '\n') {
             if (cmd == 'S' || cmd == 's') {
                 osMessagePut(myQueue_SysCmdsHandle, CMD_STOP, 0);
@@ -327,11 +338,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             else if (cmd == 'C' || cmd == 'c') {
                 global_CO2 += 500;
             }
-            // Guarda para a DefaultTask mostrar no Log
+            else if (cmd == 'T' || cmd == 't') {
+                telemetry_active = !telemetry_active; // Alterna telemetria on/off
+            }
             usb_rx_buffer[0] = cmd;
             usb_rx_flag = 1;
         }
-        // Reativa a receção imediatamente
         HAL_UART_Receive_IT(&huart2, uart_rx_byte, 1);
     }
 }

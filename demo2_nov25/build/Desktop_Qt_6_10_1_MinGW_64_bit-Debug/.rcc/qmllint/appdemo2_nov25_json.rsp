@@ -1,0 +1,14 @@
+--bare
+-I
+D:/SETR_MESTRADO/projeto_SETR/demo2_nov25/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug
+-I
+C:/Qt/6.10.1/mingw_64/qml
+--resource
+D:/SETR_MESTRADO/projeto_SETR/demo2_nov25/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/rcc/qmake_demo2_nov25.qrc
+--resource
+D:/SETR_MESTRADO/projeto_SETR/demo2_nov25/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/rcc/appdemo2_nov25_raw_qml_0.qrc
+--resource
+D:/SETR_MESTRADO/projeto_SETR/demo2_nov25/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/rcc/appdemo2_nov25_raw_res_0.qrc
+D:/SETR_MESTRADO/projeto_SETR/demo2_nov25/Main.qml
+--json
+D:/SETR_MESTRADO/projeto_SETR/demo2_nov25/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/appdemo2_nov25_qmllint.json
